@@ -9,11 +9,16 @@ module Permisi
 
   class << self
     def init
+      access.call
       yield config if block_given?
     end
 
     def config
       @config ||= Config.new
+    end
+
+    def access
+      @access ||= Access.new
     end
 
     def actors
