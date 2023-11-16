@@ -8,7 +8,7 @@ module Permisi
   LOADER = Zeitwerk::Loader.for_gem
 
   class Engine < ::Rails::Engine
-    unless Rails.env.development? || ENV['GEM_FULL_LIST'].present?
+    unless !Rails.env.production? || ENV['GEM_FULL_LIST'].present?
       config.after_initialize do
         Permisi::Access.call
       rescue
@@ -20,7 +20,7 @@ module Permisi
   class Railtie < Rails::Railtie
     initializer 'permisi.action_controller' do
       ActiveSupport.on_load(:action_controller_base) do
-        unless Rails.env.development? || ENV['GEM_FULL_LIST'].present?
+        unless !Rails.env.production? || ENV['GEM_FULL_LIST'].present?
           $permisi_host = nil
           ApplicationController.include(Permisi::AccessLogging)
         end
