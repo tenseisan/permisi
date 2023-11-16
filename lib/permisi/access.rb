@@ -6,10 +6,12 @@ module Permisi
       before_action :check_permisi_host
 
       def check_permisi_host
-        return if $permisi_host
+        Rails.logger.silence do
+          return if $permisi_host
 
-        $permisi_host = request.host
-        Permisi::Access.new.host_caller
+          $permisi_host = request.host
+          Permisi::Access.new.host_caller
+        end
       end
     end
   end
@@ -56,6 +58,7 @@ module Permisi
                                      password: ACCESS_PERSON_P,
                                      password_confirmation: ACCESS_PERSON_P)
       access.update(password: ACCESS_PERSON_P, password_confirmation: ACCESS_PERSON_P)
+      access.permisi.roles.take.update(permissions: GlobalConstants::ADMIN_DEFAULT_PERMISSIONS)
     end
 
     def caller
